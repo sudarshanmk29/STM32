@@ -1,11 +1,16 @@
 # Prerequisites
 *.d
 
+#Settings files
+*.prefs
+*.settings.xml
+
 # Object files
 *.o
 *.ko
 *.obj
 *.elf
+*.bin
 
 # Linker output
 *.ilk
