@@ -11,6 +11,13 @@
 *.obj
 *.elf
 *.bin
+*.list
+*.mk
+*.i
+*.launch
+*.cyclo
+*.s
+makefile
 
 # Linker output
 *.ilk
