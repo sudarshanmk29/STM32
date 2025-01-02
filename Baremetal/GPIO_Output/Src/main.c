@@ -25,23 +25,172 @@
 #endif
 
 #define GPIODEN			(1U<<3)
-#define PIN13			(1U<<13)
-#define LED_PIN			PIN13
 
-
-
-int main(void)
+typedef enum PIN
 {
+	PIN12 = 12,
+	PIN13,
+	PIN14,
+	PIN15
+}PIN;
 
+typedef enum FUNCTION
+{
+	OFF = 0,
+	ON,
+	TOGGLE
+}FUNCTION;
+
+
+void LED(PIN pin, FUNCTION fun)
+{
+	switch(pin)
+	{
+	case PIN12:
+		GPIOD->MODER |= (1U<<24);
+		if(fun == 0)
+			GPIOD->ODR &= ~(1<<12);
+		else if(fun == 1)
+			GPIOD->ODR |= (1<<12);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<12);
+		break;
+	case PIN13:
+		GPIOD->MODER |= (1U<<26);
+		if(fun == 0)
+			GPIOD->ODR &= ~(1<<13);
+		else if(fun == 1)
+			GPIOD->ODR |= (1<<13);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<13);
+		break;
+	case PIN14:
+		GPIOD->MODER |= (1U<<28);
+		if(fun == 0)
+			GPIOD->ODR &= ~(1<<14);
+		else if(fun == 1)
+			GPIOD->ODR |= (1<<14);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<14);
+		break;
+	case PIN15:
+		GPIOD->MODER |= (1U<<30);
+		if(fun == 0)
+			GPIOD->ODR &= ~(1<<15);
+		else if(fun == 1)
+			GPIOD->ODR |= (1<<15);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<15);
+		break;
+	}
+}
+
+void LED_bsrr(PIN pin, FUNCTION fun)
+{
+	switch(pin)
+	{
+	case PIN12:
+		GPIOD->MODER |= (1U<<24);
+		if(fun == 0)
+			GPIOD->BSRR |= (1<<28);
+		else if(fun == 1)
+			GPIOD->BSRR |= (1<<12);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<12);
+		break;
+	case PIN13:
+		GPIOD->MODER |= (1U<<26);
+		if(fun == 0)
+			GPIOD->BSRR |= (1<<29);
+		else if(fun == 1)
+			GPIOD->BSRR |= (1<<13);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<13);
+		break;
+	case PIN14:
+		GPIOD->MODER |= (1U<<28);
+		if(fun == 0)
+			GPIOD->BSRR |= (1<<30);
+		else if(fun == 1)
+			GPIOD->BSRR |= (1<<14);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<14);
+		break;
+	case PIN15:
+		GPIOD->MODER |= (1U<<30);
+		if(fun == 0)
+			GPIOD->BSRR |= (1<<31);
+		else if(fun == 1)
+			GPIOD->BSRR |= (1<<15);
+		else if(fun == 2)
+			GPIOD->ODR ^= (1<<15);
+		break;
+	}
+}
+
+void OFF_LEDS()
+{
+	GPIOD->ODR = 0x00;
+	for(int i=0;i<500000;i++);
+}
+
+void ON_LEDS()
+{
+	GPIOD->ODR = 0x00;
+
+	for(int i=0;i<300000;i++)
+		GPIOD->ODR = 0xF000;
+}
+void BSRR_func(void)
+{
+	for(int i=0;i<10;i++)
+	{
+		LED_bsrr(15, 1);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(14, 1);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(13, 1);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(12, 1);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(15, 0);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(14, 0);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(13, 0);
+		for(int i=0;i<100000;i++);
+		LED_bsrr(12, 0);
+	}
+}
+
+void ODR_func(void)
+{
+	for(int i=0;i<10;i++)
+	{
+		LED(12, 2);
+		for(int i=0;i<100000;i++);
+		LED(13, 1);
+		for(int i=0;i<100000;i++);
+		LED(13, 0);
+		for(int i=0;i<100000;i++);
+		LED(14, 2);
+		for(int i=0;i<100000;i++);
+		LED(15, 1);
+	}
+}
+
+int main()
+{
 	RCC->AHB1ENR |=GPIODEN;
-
 	GPIOD->MODER &= 0x00;
-	GPIOD->MODER |= (1U<<26);
 
 	while(1)
 	{
-		GPIOD->ODR ^=LED_PIN;
-		for(int i=0;i<100000;i++);
-
+		ON_LEDS();
+		for(int i=0;i<400000;i++);
+		ODR_func();
+		BSRR_func();
+		OFF_LEDS();
+		for(int i=0;i<400000;i++);
 	}
 }
